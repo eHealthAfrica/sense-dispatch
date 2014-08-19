@@ -1,0 +1,43 @@
+{
+  "name": "sense-dispatch",
+  "version": "0.0.0",
+  "description": "messaging framework for eHealth Sense app.",
+  "keywords": ["sense"," eHealth"," ebola"," sms"," message"],
+  "author": "eHealth Africa",
+  "contributors": [],
+  "license": "MIT",
+  "homepage": "https://github.com/eHealthAfrica/sense-dispatch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eHealthAfrica/sense-dispatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/eHealthAfrica/sense-dispatch/issues"
+  },
+  "main": "index.js",
+  "files": [
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md",
+    "index.js",
+    "lib",
+    "bin"
+  ],
+  "scripts": {
+    "prepublish": "grunt build",
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-mocha-test": "~0.8.1",
+    "mocha-multi": "~0.3.0",
+    "mocha-slow-reporter": "0.0.0",
+    "chai": "~1.8.1",
+    "rimraf": "~2.2.5",
+    "mocha-unfunk-reporter": "~0.4.0",
+    "istanbul": "~0.2.3"
+  },
+  "peerDependencies": {},
+  "dependencies": {}
+}
