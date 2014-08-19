@@ -2,10 +2,10 @@
   "name": "sense-dispatch",
   "version": "0.0.0",
   "description": "messaging framework for eHealth Sense app.",
-  "keywords": ["sense"," eHealth"," ebola"," sms"," message"],
+  "keywords": ["sense", " eHealth", " ebola", " sms", " message"],
   "author": "eHealth Africa",
   "contributors": [],
-  "license": "MIT",
+  "license": "ISC",
   "homepage": "https://github.com/eHealthAfrica/sense-dispatch",
   "repository": {
     "type": "git",
@@ -39,5 +39,8 @@
     "istanbul": "~0.2.3"
   },
   "peerDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "log4js": "~0.6.16",
+    "pouchdb": "~2.2.3"
+  }
 }
