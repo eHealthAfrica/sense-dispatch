@@ -19,7 +19,7 @@ var isArray = function(o) {
 var getRecentVisit = function(dailyVisits) {
   if (isArray(dailyVisits) && dailyVisits.length > 0) {
     var sorted = dailyVisits.sort(function(a, b) {
-      return new Date(a.dateOfVisit) < new Date(b.dateOfVisit);
+      return (new Date(b.dateOfVisit).getTime() - new Date(a.dateOfVisit).getTime());
     });
     return sorted[0];
   }
@@ -27,7 +27,7 @@ var getRecentVisit = function(dailyVisits) {
 };
 
 var processDailyVisit = function(dv){
-  if(dv.temperature > MAX_TEMP){
+  if(dv.temperature >= MAX_TEMP){
     //TODO: send sms and email here.
   }
 };
@@ -40,6 +40,7 @@ db.changes(options)
     if(typeof dailyVisit !== 'undefined'){
       processDailyVisit(dailyVisit);
     }
-  }).on('error', function(err) {
+  })
+  .on('error', function(err) {
     console.log(err);
   });
