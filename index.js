@@ -2,6 +2,7 @@
 var config = require('./config/config');
 var PouchDB = require('pouchdb');
 var log4js = require('log4js');
+var dotenv = require('dotenv');
 
 /*jshint camelcase: false */
 var options = {
@@ -27,12 +28,13 @@ var getRecentVisit = function(dailyVisits) {
 };
 
 var processDailyVisit = function(dv){
+  console.info(dv);
   if(dv.temperature >= MAX_TEMP){
     //TODO: send sms and email here.
   }
 };
 
-var db = new PouchDB(config.url);
+var db = new PouchDB(config.dbUrl);
 db.changes(options)
   .on('change',function(change) {
     var contact = change.doc;
