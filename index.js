@@ -215,7 +215,7 @@ var processDailyVisits = function(contact) {
       .then(function(recipients) {
         if (isArray(recipients) && recipients.length > 0) {
           emailBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
-          //smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+          smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
         } else {
           logger.info('Recipient list is empty.');
         }
