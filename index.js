@@ -132,10 +132,8 @@ var getAlert = function(contact, dv, msg) {
 
 var smsBroadcast = function(recipients, msg, alert) {
   alert.type = 'SMS';
-  var r;
   var logMsg;
-  for (var i in recipients) {
-    r = recipients[i];
+  recipients.forEach(function(r) {
     if (r.phoneNo && r.phoneNo.length > 0) {
       sendSms(r.phoneNo, msg, requestOptions)
         .then(function() {
@@ -167,7 +165,7 @@ var smsBroadcast = function(recipients, msg, alert) {
     } else {
       logger.warn('Recipient does not have phone number. Recipient: ' + r.id);
     }
-  }
+  });
 };
 
 var emailBroadcast = function(recipients, msg, alert, subject) {
@@ -211,14 +209,13 @@ var emailBroadcast = function(recipients, msg, alert, subject) {
 
 var processDailyVisits = function(contact) {
   var dailyVisit = getRecentVisit(contact.dailyVisits);
-  if (typeof dailyVisit !== 'undefined' && typeof dailyVisit.symptoms !== 'undefined'
-    && dailyVisit.symptoms.temperature >= MAX_TEMP) {
+  if (typeof dailyVisit !== 'undefined' && typeof dailyVisit.symptoms !== 'undefined' && dailyVisit.symptoms.temperature >= MAX_TEMP) {
     var msg = getMsg(contact, dailyVisit);
     getRecipients()
       .then(function(recipients) {
         if (isArray(recipients) && recipients.length > 0) {
           emailBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
-          smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+          //smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
         } else {
           logger.info('Recipient list is empty.');
         }
