@@ -42,6 +42,9 @@
   "dependencies": {
     "log4js": "~0.6.16",
     "pouchdb": "~2.2.3",
-    "dotenv": "0.4.0"
+    "dotenv": "0.4.0",
+    "request": "~2.36.0",
+    "nodemailer": "0.6.5",
+    "q": "~1.0.1"
   }
 }
