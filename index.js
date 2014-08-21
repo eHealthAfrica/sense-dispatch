@@ -145,7 +145,9 @@ var smsBroadcast = function(recipients, msg, alert) {
             ', Message: ', msg
           ].join(' ');
           logger.info(logMsg);
-          logAlert(alert)
+          var a = JSON.parse(JSON.stringify(alert));
+          a.recipientId = r._id;
+          logAlert(a)
             .then(function(res) {
               logger.info('Alert Logged to CouchDB: ' + JSON.stringify(res));
             })
@@ -182,7 +184,9 @@ var emailBroadcast = function(recipients, msg, alert, subject) {
             ', Message: ', msg
           ].join(' ');
           logger.info(logMsg);
-          logAlert(alert)
+          var a = JSON.parse(JSON.stringify(alert));
+          a.recipientId = r._id;
+          logAlert(a)
             .then(function(res) {
               logger.info('Alert Logged to CouchDB: ' + JSON.stringify(res));
             })
