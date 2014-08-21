@@ -6,6 +6,7 @@ var q = require("q");
 var dateFormat = require('dateformat');
 var dotenv = require('dotenv');
 dotenv.load();
+var nodeMailer = require("nodemailer");
 /*jshint camelcase: false */
 var options = {
   live: true,
@@ -22,6 +23,9 @@ var SMS_URI = process.env.SMS_URI;
 var CONTACTS_DB_URL = process.env.DB_URL;
 var ALERTS_DB_URL = process.env.ALERT_DB_URL;
 var recipientView = process.env.RECIPIENT_VIEW;
+var EMAIL = process.env.EMAIL;
+var PWD = process.env.EMAIL_PWD;
+var EMAIL_SERVICE = process.env.EMAIL_SERVICE;
 var MAX_TEMP = 38.0;
 var LOG_CATEGORY = 'SENSE-DISPATCH';
 var requestOptions = {
@@ -29,7 +33,13 @@ var requestOptions = {
   uri: SMS_URI,
   json: smsOptions
 };
-
+var mailerSettings = {
+  service: EMAIL_SERVICE,
+  auth: {
+    user: EMAIL,
+    pass: PWD
+  }
+};
 log4js.configure({
   appenders: [
     { type: 'console' },
@@ -37,6 +47,27 @@ log4js.configure({
   ]
 });
 var logger = log4js.getLogger(LOG_CATEGORY);
+
+var sendEmail = function(recipient, sender, msg, subject, opts) {
+  var deferred = q.defer();
+  var settings = opts || mailerSettings;
+  var smtpTransport = nodeMailer.createTransport("SMTP", settings);
+  var mailInfo = {
+    from: sender,
+    to: recipient,
+    subject: subject,
+    text: msg
+  };
+  smtpTransport.sendMail(mailInfo, function(err, res) {
+    if (!err) {
+      deferred.resolve(res);
+    } else {
+      deferred.reject(err);
+    }
+  });
+  return deferred.promise;
+};
+
 
 var sendSms = function(recipient, msg, reqOptions) {
   var deferred = q.defer();
@@ -69,7 +100,6 @@ var logAlert = function(alert) {
   var db = new PouchDB(ALERTS_DB_URL);
   alert.docType = 'alert';
   alert.sentOn = new Date().toJSON();
-  console.info(alert);
   return db.post(alert);
 };
 
@@ -101,13 +131,12 @@ var getAlert = function(contact, dv, msg) {
 };
 
 var smsBroadcast = function(recipients, msg, alert) {
-  if (!isArray(recipients)) {
-    recipients = [];
-  }
   alert.type = 'SMS';
-  recipients.forEach(function(r) {
+  var r;
+  var logMsg;
+  for (var i in recipients) {
+    r = recipients[i];
     if (r.phoneNo && r.phoneNo.length > 0) {
-      var logMsg;
       sendSms(r.phoneNo, msg, requestOptions)
         .then(function() {
           logMsg = [
@@ -133,18 +162,62 @@ var smsBroadcast = function(recipients, msg, alert) {
           ].join(' ');
           logger.error(logMsg);
         });
+    } else {
+      logger.warn('Recipient does not have phone number. Recipient: ' + r.id);
+    }
+  }
+};
+
+var emailBroadcast = function(recipients, msg, alert, subject) {
+  alert.type = 'email';
+  var title = subject || 'Contact Temperature Alert';
+  recipients.forEach(function(r) {
+    var logMsg;
+    if (r.email && r.email.length > 0) {
+      sendEmail(r.email, mailerSettings.auth.user, msg, title)
+        .then(function() {
+          logMsg = [
+            'Email sent To: ', r._id,
+            ', email:', r.email,
+            ', Message: ', msg
+          ].join(' ');
+          logger.info(logMsg);
+          logAlert(alert)
+            .then(function(res) {
+              logger.info('Alert Logged to CouchDB: ' + JSON.stringify(res));
+            })
+            .catch(function(reason) {
+              logger.error('CouchDB Alert Log Error: ' + JSON.stringify(reason));
+            });
+        })
+        .catch(function(reason) {
+          logMsg = [
+            'Email Alert Failed: To: ', r._id,
+            ', email: ', r.email,
+            ', Message: ', msg,
+            'Reason: ', reason
+          ].join(' ');
+          logger.error(logMsg);
+        });
+    } else {
+      logger.warn('Recipient does not have email. Recipient: ' + r.id);
     }
   });
 };
 
 var processDailyVisits = function(contact) {
   var dailyVisit = getRecentVisit(contact.dailyVisits);
-  var visitTemp = dailyVisit.symptoms.temperature;
-  if (typeof dailyVisit !== 'undefined' && visitTemp >= MAX_TEMP) {
+  if (typeof dailyVisit !== 'undefined' && typeof dailyVisit.symptoms !== 'undefined'
+    && dailyVisit.symptoms.temperature >= MAX_TEMP) {
     var msg = getMsg(contact, dailyVisit);
     getRecipients()
       .then(function(recipients) {
-        smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+        if (isArray(recipients) && recipients.length > 0) {
+          emailBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+          smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+        } else {
+          logger.info('Recipient list is empty.');
+        }
       })
       .catch(function(err) {
         logger.error('getRecipients() failed: ' + err);
@@ -153,11 +226,17 @@ var processDailyVisits = function(contact) {
 };
 
 var db = new PouchDB(CONTACTS_DB_URL);
+var seqBefore;
 db.changes(options)
   .on('change', function(change) {
-    var contact = change.doc;
-    processDailyVisits(contact);
+    if (typeof seqBefore === 'undefined') {
+      seqBefore = change.seq;
+    }
+    if (change.seq !== seqBefore) {
+      var contact = change.doc;
+      processDailyVisits(contact);
+    }
   })
   .on('error', function(err) {
-    console.log(err);
+    logger.error('DB Changes Error: ' + err);
   });
