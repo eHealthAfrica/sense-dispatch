@@ -230,6 +230,7 @@ var processDailyVisits = function(contact, startDateTime) {
       logger.warn('Old daily visits. Date of Visit: '+dailyVisit.dateOfVisit+', Contact Id: '+contact._id);
       return;
     }
+
     getSentAlert(contact._id, dailyVisit.dateOfVisit)
       .then(function(res) {
         if (res.length === 0) {
@@ -253,7 +254,10 @@ var processDailyVisits = function(contact, startDateTime) {
       .catch(function(err) {
         logger.error('Retrieval of sent alerts failed: ' + err);
       });
+  }else{
+    logger.info('skipped daily visit');
   }
+
 };
 
 var db = new PouchDB(CONTACTS_DB_URL);
