@@ -6,6 +6,7 @@ var q = require("q");
 var dateFormat = require('dateformat');
 var dotenv = require('dotenv');
 dotenv.load();
+
 var nodeMailer = require("nodemailer");
 /*jshint camelcase: false */
 var options = {
@@ -26,6 +27,7 @@ var recipientView = process.env.RECIPIENT_VIEW;
 var EMAIL = process.env.EMAIL;
 var PWD = process.env.EMAIL_PWD;
 var EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+var SENT_ALERTS = process.env.SENT_ALERTS;
 var MAX_TEMP = 38.0;
 var LOG_CATEGORY = 'SENSE-DISPATCH';
 var requestOptions = {
@@ -103,6 +105,19 @@ var logAlert = function(alert) {
   return db.post(alert);
 };
 
+var getSentAlert = function(contactId, dateOfVisit) {
+  var db = new PouchDB(ALERTS_DB_URL);
+  var k = contactId + dateOfVisit;
+  var options = {
+    include_docs: true,
+    key: k
+  };
+  return db.query(SENT_ALERTS, options)
+    .then(function(res) {
+      return res.rows
+    });
+};
+
 var getMsg = function(contact, dv) {
   var name = contact.Surname + ', ' + contact.OtherNames;
   var temp = dv.symptoms.temperature + ' C';
@@ -145,6 +160,7 @@ var smsBroadcast = function(recipients, msg, alert) {
           logger.info(logMsg);
           var a = JSON.parse(JSON.stringify(alert));
           a.recipientId = r._id;
+          a._id = a.recipientId + a.contactId + a.dateOfVisit + alert.type;
           logAlert(a)
             .then(function(res) {
               logger.info('Alert Logged to CouchDB: ' + JSON.stringify(res));
@@ -163,7 +179,7 @@ var smsBroadcast = function(recipients, msg, alert) {
           logger.error(logMsg);
         });
     } else {
-      logger.warn('Recipient does not have phone number. Recipient: ' + r.id);
+      logger.warn('Recipient does not have phone number. Recipient: ' + r._id);
     }
   });
 };
@@ -202,40 +218,56 @@ var emailBroadcast = function(recipients, msg, alert, subject) {
           logger.error(logMsg);
         });
     } else {
-      logger.warn('Recipient does not have email. Recipient: ' + r.id);
+      logger.warn('Recipient does not have email. Recipient: ' + r._id);
     }
   });
 };
 
-var processDailyVisits = function(contact) {
+var processDailyVisits = function(contact, startDateTime) {
   var dailyVisit = getRecentVisit(contact.dailyVisits);
   if (typeof dailyVisit !== 'undefined' && typeof dailyVisit.symptoms !== 'undefined' && dailyVisit.symptoms.temperature >= MAX_TEMP) {
-    var msg = getMsg(contact, dailyVisit);
-    getRecipients()
-      .then(function(recipients) {
-        if (isArray(recipients) && recipients.length > 0) {
-          emailBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
-          smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+    if(new Date(startDateTime).getTime() > new Date(dailyVisit.dateOfVisit).getTime()){
+      logger.warn('Old daily visits. Date of Visit: '+dailyVisit.dateOfVisit+', Contact Id: '+contact._id);
+      return;
+    }
+    getSentAlert(contact._id, dailyVisit.dateOfVisit)
+      .then(function(res) {
+        if (res.length === 0) {
+          var msg = getMsg(contact, dailyVisit);
+          getRecipients()
+            .then(function(recipients) {
+              if (isArray(recipients) && recipients.length > 0) {
+                emailBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+                smsBroadcast(recipients, msg, getAlert(contact, dailyVisit, msg));
+              } else {
+                logger.info('Recipient list is empty.');
+              }
+            })
+            .catch(function(err) {
+              logger.error('getRecipients() failed: ' + err);
+            });
         } else {
-          logger.info('Recipient list is empty.');
+          logger.warn('Alert already sent for contact id' + contact._id + ', daily visit: ' + dailyVisit.dateOfVisit);
         }
       })
       .catch(function(err) {
-        logger.error('getRecipients() failed: ' + err);
+        logger.error('Retrieval of sent alerts failed: ' + err);
       });
   }
 };
 
 var db = new PouchDB(CONTACTS_DB_URL);
 var seqBefore;
+var startDateTime;
 db.changes(options)
   .on('change', function(change) {
     if (typeof seqBefore === 'undefined') {
       seqBefore = change.seq;
+      startDateTime = new Date();
     }
     if (change.seq !== seqBefore) {
       var contact = change.doc;
-      processDailyVisits(contact);
+      processDailyVisits(contact, startDateTime);
     }
   })
   .on('error', function(err) {
