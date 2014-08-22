@@ -114,7 +114,7 @@ var getSentAlert = function(contactId, dateOfVisit) {
   };
   return db.query(SENT_ALERTS, options)
     .then(function(res) {
-      return res.rows
+      return res.rows;
     });
 };
 
