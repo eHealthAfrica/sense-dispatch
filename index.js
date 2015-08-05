@@ -21,7 +21,6 @@ var smsOptions = {
   "api_key": process.env.API_KEY
 };
 var SMS_URI = process.env.SMS_URI;
-var CONTACTS_DB_URL = process.env.DB_URL;
 var ALERTS_DB_URL = process.env.ALERT_DB_URL;
 var recipientView = process.env.RECIPIENT_VIEW;
 var EMAIL = process.env.EMAIL;
@@ -256,20 +255,24 @@ var processDailyVisits = function(contact, startDateTime) {
   }
 };
 
-var db = new PouchDB(CONTACTS_DB_URL);
-var seqBefore;
-var startDateTime;
-db.changes(options)
-  .on('change', function(change) {
-    if (typeof seqBefore === 'undefined') {
-      seqBefore = change.seq;
-      startDateTime = new Date();
-    }
-    if (change.seq !== seqBefore) {
-      var contact = change.doc;
-      processDailyVisits(contact, startDateTime);
-    }
-  })
-  .on('error', function(err) {
-    logger.error('DB Changes Error: ' + err);
-  });
+function run(opt) {
+  var db = new PouchDB(opt.CONTACTS_DB_URL);
+  var seqBefore;
+  var startDateTime;
+  db.changes(options)
+    .on('change', function(change) {
+      if (typeof seqBefore === 'undefined') {
+        seqBefore = change.seq;
+        startDateTime = new Date();
+      }
+      if (change.seq !== seqBefore) {
+        var contact = change.doc;
+        processDailyVisits(contact, startDateTime);
+      }
+    })
+    .on('error', function(err) {
+      logger.error('DB Changes Error: ' + err);
+    });
+}
+
+module.exports.run = run;
