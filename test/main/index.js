@@ -1,5 +1,5 @@
-describe('The Main module', function() {
-  it('should be exposed', function() {
-    require('../../').Main.should.exist;
+describe('the run function', function() {
+  it('should exist', function() {
+    require('../../').run.should.exist;
   });
 });

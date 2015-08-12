@@ -2,7 +2,13 @@
   "name": "sense-dispatch",
   "version": "0.0.0",
   "description": "messaging framework for eHealth Sense app.",
-  "keywords": ["sense", " eHealth", " ebola", " sms", " message"],
+  "keywords": [
+    "sense",
+    " eHealth",
+    " ebola",
+    " sms",
+    " message"
+  ],
   "author": "eHealth Africa",
   "contributors": [],
   "license": "ISC",
@@ -23,6 +29,7 @@
     "lib",
     "bin"
   ],
+  "bin": "./sense-dispatch.js",
   "scripts": {
     "prepublish": "grunt build",
     "test": "grunt test"
@@ -40,12 +47,12 @@
   },
   "peerDependencies": {},
   "dependencies": {
-    "log4js": "~0.6.16",
-    "pouchdb": "~2.2.3",
+    "dateformat": "~1.0.7-1.2.3",
     "dotenv": "0.4.0",
-    "request": "~2.36.0",
+    "log4js": "~0.6.16",
     "nodemailer": "0.6.5",
+    "pouchdb": "^3.6.0",
     "q": "~1.0.1",
-    "dateformat": "~1.0.7-1.2.3"
+    "request": "~2.36.0"
   }
 }
