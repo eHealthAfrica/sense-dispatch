@@ -1,6 +1,6 @@
 {
   "name": "sense-dispatch",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "messaging framework for eHealth Sense app.",
   "keywords": [
     "sense",
@@ -20,39 +20,41 @@
   "bugs": {
     "url": "https://github.com/eHealthAfrica/sense-dispatch/issues"
   },
-  "main": "index.js",
-  "files": [
-    "LICENSE",
-    "README.md",
-    "CHANGELOG.md",
-    "index.js",
-    "lib",
-    "bin"
-  ],
-  "bin": "./sense-dispatch.js",
+  "bin": {
+    "sense-dispatch": "./sense-dispatch.js",
+    "sense-dispatch-2": "./sense-dispatch-2.js"
+  },
   "scripts": {
     "prepublish": "grunt build",
     "test": "grunt test"
   },
   "devDependencies": {
+    "chai": "~1.8.1",
     "grunt": "~0.4.2",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-mocha-test": "~0.8.1",
+    "istanbul": "~0.2.3",
     "mocha-multi": "~0.3.0",
     "mocha-slow-reporter": "0.0.0",
-    "chai": "~1.8.1",
-    "rimraf": "~2.2.5",
     "mocha-unfunk-reporter": "~0.4.0",
-    "istanbul": "~0.2.3"
+    "rimraf": "~2.2.5",
+    "sinon": "^1.16.0"
   },
   "peerDependencies": {},
   "dependencies": {
+    "baconjs": "^0.7.71",
     "dateformat": "~1.0.7-1.2.3",
     "dotenv": "0.4.0",
+    "flat": "^1.6.0",
+    "follow": "^0.12.1",
+    "lodash": "^3.10.1",
     "log4js": "~0.6.16",
+    "loglevel": "^1.3.1",
     "nodemailer": "0.6.5",
     "pouchdb": "^3.6.0",
     "q": "~1.0.1",
-    "request": "~2.36.0"
+    "raven": "^0.8.1",
+    "request": "~2.36.0",
+    "yargs": "^3.20.0"
   }
 }

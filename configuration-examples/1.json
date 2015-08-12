@@ -1,0 +1,4 @@
+{
+  recipients: [],
+  template: "A new Ebola suspect was found, the id is ${ _personId }"
+}
