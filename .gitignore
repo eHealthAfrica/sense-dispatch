@@ -6,4 +6,13 @@ coverage
 build
 npm-debug.log
 *.env
+sense-dispatch.log#	test/000005.ldb
+test/*.ldb
+test/*.log
+test/CURRENT
+test/LOCK
+test/LOG
+test/LOG.old
+test/MANIFEST-*
+
 sense-dispatch.log
