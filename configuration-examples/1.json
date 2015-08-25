@@ -1,4 +1,4 @@
 {
-  recipients: [],
-  template: "A new Ebola suspect was found, the id is ${ _personId }"
+  "recipients": ["+1234", "+56789"],
+  "template": "A new Ebola suspect was found, the id is ${ personId }"
 }
