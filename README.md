@@ -35,7 +35,7 @@ existing document.
 
 An example use is:
 
-    sense-dispatch-2.js -b -g https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense/_messages -d https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense
+    sense-dispatch.js -b -g https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense/_messages -d https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense
 
 Note that `-b` activates extra debugging info and can be omitted.
 
@@ -44,21 +44,3 @@ database, in the document with id `sense-dispatch-configuration`. This
 will be automatically reloaded when changed. See the directory
 `configuration-examples` here in order to see how to structure the
 document.
-
-#### What about the 2?
-
-I was working on this project after one year of inactivity, and for a
-different use case. New functionalities i needed were all easier to
-write from scratch, but i can't exclude that we might want to use the
-preexisting logic, so i created some new files marked with `2`, namely
-a new library, `lib2` and a new executable,
-`sense-dispatch-2`. Eventually this duplication could be eliminated.
-
-Information in this README refer to version 2. As far as i understand,
-the goal of the former version was to send messages *and* emails upon
-some events. When we started working on this again, we did not need
-emails, and we needed to communicate with a different service for
-sending messages. The service used in `lib2.js` for sending messages
-is the [Telerivet
-Gateway](https://github.com/eHealthAfrica/telerivet-gateway), while i
-am not sure about which service is used in `lib.js`
