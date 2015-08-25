@@ -2,7 +2,7 @@
  * library into a single function to be run. i keep all code depending
  * on Bacon here, so if somebody will want to stop using Bacon in the
  * future, it will be easier */
-var lib2 = require('./lib2');
+var lib2 = require('./lib');
 var Bacon = require('baconjs');
 
 // this is an adapter function. it gets a Pouch changes object and it

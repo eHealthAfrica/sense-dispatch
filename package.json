@@ -20,10 +20,7 @@
   "bugs": {
     "url": "https://github.com/eHealthAfrica/sense-dispatch/issues"
   },
-  "bin": {
-    "sense-dispatch": "./sense-dispatch.js",
-    "sense-dispatch-2": "./sense-dispatch-2.js"
-  },
+  "bin": "./sense-dispatch.js",
   "scripts": {
     "prepublish": "grunt build",
     "test": "grunt test"
