@@ -40,16 +40,11 @@
   "peerDependencies": {},
   "dependencies": {
     "baconjs": "^0.7.71",
-    "dateformat": "~1.0.7-1.2.3",
-    "dotenv": "0.4.0",
     "flat": "^1.6.0",
-    "follow": "^0.12.1",
     "lodash": "^3.10.1",
-    "log4js": "~0.6.16",
     "loglevel": "^1.3.1",
-    "nodemailer": "0.6.5",
     "pouchdb": "^3.6.0",
-    "q": "~1.0.1",
+    "q": "^1.0.1",
     "raven": "^0.8.1",
     "request": "^2.61.0",
     "yargs": "^3.20.0"
