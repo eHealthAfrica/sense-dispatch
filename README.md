@@ -26,11 +26,6 @@ The service works as follows:
 - fills the document in the template
 - sends the message to the recipients
 
-This streamlined control flow has the implication that a message can
-be sent just when a new document is created. At the moment, the
-control flow does not support notifications about a *change* in an
-existing document.
-
 ### Command line use
 
 This service gets some options from the command line and some options
