@@ -35,6 +35,21 @@ describe('the second library', function() {
         });
       }, 'persoId is not defined');
     });
+    it('ignores missing properties on the second level', function() {
+      var result = lib.dispatch({
+        configurationDocument: {
+          template: 'A new Ebola suspect was found, the id is ${ one.two }',
+          recipients: ['1234']
+        },
+        change: {
+          one: {}
+        }
+      });
+      assert.deepEqual(result, [{
+        to: '1234',
+        content: 'A new Ebola suspect was found, the id is '
+      }]);
+    });
   });
   describe('withOptions', function() {
     var withOptions;
