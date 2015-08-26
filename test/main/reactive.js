@@ -1,4 +1,5 @@
-/* jshint camelcase: false */
+/* jshint camelcase: false */ // for doc_type
+/* jshint newcap: false */ // for Q()
 
 describe('the reactive logic', function() {
   var Bacon = require('baconjs');
@@ -32,7 +33,9 @@ describe('the reactive logic', function() {
           getChanges: constant(emitters.configurationDocument)
         },
         getChanges: constant(emitters.changes),
-        sendToMobile: sinon.spy()
+        inline: function(a) { return Q(a); },
+        sendToMobile: sinon.spy(),
+        captureError: sinon.spy()
       };
       // we need to do this before passing `withOptions` to `constant`
       sinon.spy(withOptions, 'getChanges');
@@ -82,6 +85,24 @@ describe('the reactive logic', function() {
         reactive.configurationDocuments.sampledBy(stream).onValue(spy);
         assert.equal(spy.args.length, 3);
       });
+      describe('with a faulty `dispatch`, on a document change', function() {
+        var error;
+        beforeEach(function(done) {
+          error = new Error('dispatch error');
+          lib.dispatch = function() { throw(error); };
+          emitters.changes.emit('change', {});
+          // there are some Q promises along the way, which would lead
+          // to a failure if we evaluated this synchronously, so let
+          // us take some time
+          Q.delay(100).then(done);
+        });
+        it('is called', function() {
+          assert(withOptions.captureError.called);
+        });
+        it('logs the error', function() {
+          assert.deepEqual(withOptions.captureError.args, [[error]]);
+        });
+      });
       describe('on a document change', function() {
         var hadListeners, changesSpy, changesAndConfigurationsSpy;
         var change = {
@@ -98,17 +119,21 @@ describe('the reactive logic', function() {
             symptoms: {},
             geoInfo: {},
             interviewer: [Object],
-            personId: '214119b8-b317-43ae-98fb-aa00c3ae559c',
+            personId: '214119b8-98fb-43ae-b317-aa00c3ae559c',
             doc_type: 'followup',
             version: '1.19.0'
           }
         };
-        beforeEach(function() {
+        beforeEach(function(done) {
           changesSpy = sinon.spy();
           changesAndConfigurationsSpy = sinon.spy();
           reactive.changes.onValue(changesSpy);
           reactive.changesAndConfigurations.onValue(changesAndConfigurationsSpy);
           hadListeners = emitters.changes.emit('change', {});
+          // there are some Q promises along the way, which would lead
+          // to a failure if we evaluated this synchronously, so let
+          // us take some time
+          Q.delay(100).then(done);
         });
         it('had listeners', function() {
           assert(hadListeners);

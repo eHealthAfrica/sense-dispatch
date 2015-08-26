@@ -4,6 +4,7 @@ var assert = require('assert'),
     request = require('request'),
     raven = require('raven'),
     log = require('loglevel'),
+    Q = require('q'),
     sentryEndpoint = 'https://73134a7f0b994921808bfac454af4c78:369aeb7cae02496ba255b60ad352097e@app.getsentry.com/50531';
 
 function withOptions(options) {
@@ -51,6 +52,27 @@ function withOptions(options) {
       });
     return changes;
   }
+  function inline(obj) {
+    var path = obj.configurationDocument.inlinePath;
+    if (path) {
+      var id = _.get(obj.change, path);
+      return db
+        .get(id)
+        .then(function(document) {
+          _.set(obj.change, path, document);
+          return obj;
+        })
+        .catch(function(error) {
+          captureMessage('error inlining document '+id, { extra:error });
+          // returning the object without inlining seems the most
+          // reasonable thing we can do here. anyway this will likely
+          // lead to an error with templating
+          return obj;
+        });
+    } else {
+      return Q(obj);
+    }
+  }
 
   /* this is a nice place where to do some consistency check, for
    * example where to check that the Telerivet endpoint is reachable,
@@ -76,6 +98,7 @@ function withOptions(options) {
         view: 'dashboard/symptomatic-followups-by-dateofvisit'
       });
     },
+    inline: inline,
     sendToMobile: function(message) {
       log.debug('sending '+JSON.stringify(message));
       request({

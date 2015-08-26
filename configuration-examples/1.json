@@ -1,4 +1,5 @@
 {
   "recipients": ["+1234", "+56789"],
-  "template": "A new Ebola suspect was found, the id is ${ personId }"
+  "template": "A new Ebola suspect was found, the name is ${personId.otherNames} ${ personId.surname }",
+  "inlinePath": "personId"
 }

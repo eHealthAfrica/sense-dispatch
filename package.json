@@ -1,6 +1,6 @@
 {
   "name": "sense-dispatch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "messaging framework for eHealth Sense app.",
   "keywords": [
     "sense",

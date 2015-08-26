@@ -74,16 +74,22 @@ module.exports.main = function(options, mockedLib) {
                 change: change
               };
             });
+      // we convert the returned promises to streams which will be
+      // concatenated by `flatMap`
+      var inlined = changesAndConfigurations.flatMap(function(obj) {
+        var promise = withOptions.inline(obj);
+        return Bacon.fromPromise(promise);
+      });
       // for every change event we create a stream of messages to be
       // sent, then all those streams are flatted together. since we
       // are generating streams from arrays, they will be closed
       // automatically
-      var outgoing = changesAndConfigurations.flatMap(function(obj) {
+      var outgoing = inlined.flatMap(function(obj) {
         try {
           var outgoingArray = lib.dispatch(obj);
           return Bacon.fromArray(outgoingArray);
         } catch (error) {
-          lib.captureError(error);
+          withOptions.captureError(error);
           return Bacon.never();
         }
       });

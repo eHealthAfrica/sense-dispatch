@@ -4,7 +4,7 @@ var yargs = require('yargs'),
     reactive = require('./reactive');
 
 var options = yargs
-      .version('0.1.0')
+      .version('0.2.0')
       .usage('Usage: $0 -d <database location> -g <gateway location>')
       .options({
         'd': {
