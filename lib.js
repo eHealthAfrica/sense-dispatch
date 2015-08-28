@@ -1,7 +1,6 @@
 var assert = require('assert'),
     PouchDB = require('pouchdb'),
     _ = require('lodash'),
-    flatten = require('flat'),
     request = require('request'),
     raven = require('raven'),
     log = require('loglevel'),
@@ -106,7 +105,7 @@ function withOptions(options) {
 
 function dispatch(obj) {
   var render = _.template(obj.configurationDocument.template),
-      content = render(flatten(obj.change)),
+      content = render(obj.change),
       outgoing = obj.configurationDocument.recipients.map(function(recipient) {
         return {
           to: recipient,
