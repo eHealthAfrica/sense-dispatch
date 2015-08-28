@@ -1,76 +1,76 @@
-var assert = require('assert'),
-    PouchDB = require('pouchdb'),
-    _ = require('lodash'),
-    request = require('request'),
-    raven = require('raven'),
-    log = require('loglevel'),
-    Q = require('q'),
-    sentryEndpoint = 'https://73134a7f0b994921808bfac454af4c78:369aeb7cae02496ba255b60ad352097e@app.getsentry.com/50531';
+var assert = require('assert')
+var PouchDB = require('pouchdb')
+var _ = require('lodash')
+var request = require('request')
+var raven = require('raven')
+var log = require('loglevel')
+var Q = require('q')
+var sentryEndpoint = 'https://73134a7f0b994921808bfac454af4c78:369aeb7cae02496ba255b60ad352097e@app.getsentry.com/50531'
 
-function withOptions(options) {
-  assert(options.database, 'Pouch requires a database name');
-  var db = new PouchDB(options.database),
-      configurationId = 'sense-dispatch-configuration',
-      client = new raven.Client(sentryEndpoint);
+function withOptions (options) {
+  assert(options.database, 'Pouch requires a database name')
+  var db = new PouchDB(options.database)
+  var configurationId = 'sense-dispatch-configuration'
+  var client = new raven.Client(sentryEndpoint)
 
-  options.debug && log.setLevel('debug');
+  options.debug && log.setLevel('debug')
 
-  client.patchGlobal(function() {
-    log.error('Uncaught exception, terminating');
-    process.exit(1);
-  });
+  client.patchGlobal(function () {
+    log.error('Uncaught exception, terminating')
+    process.exit(1)
+  })
 
-  function captureMessage(text, options) {
-    log.error(text);
-    log.error(JSON.stringify(options.extra));
-    client.captureMessage.apply(client, arguments);
+  function captureMessage (text, options) {
+    log.error(text)
+    log.error(JSON.stringify(options.extra))
+    client.captureMessage.apply(client, arguments)
   }
-  function listenChanges(options) {
+  function listenChanges (options) {
     // the options used identify this change emitter
-    var ident = JSON.stringify(options);
-    log.debug('listening for changes with options '+ident);
+    var ident = JSON.stringify(options)
+    log.debug('listening for changes with options ' + ident)
     // some options are always used, i omitted them from `ident` in
     // order to make logs easier to follow
     var complete = _.defaults(options, {
       live: true,
       include_docs: true,
       since: 'now'
-    });
-    var changes = db.changes(complete);
+    })
+    var changes = db.changes(complete)
     changes
-      .on('change', function() {
-        log.debug('change detected');
-        log.debug(arguments);
+      .on('change', function () {
+        log.debug('change detected')
+        log.debug(arguments)
       })
-      .on('error', function(err) {
-        var text = 'change with options '+ident+' found an error'; 
-        captureMessage(text, { extra:err });
+      .on('error', function (err) {
+        var text = 'change with options ' + ident + ' found an error'
+        captureMessage(text, { extra: err })
       })
-      .on('complete', function() {
-        var text = 'a changes feed terminated';
-        captureMessage(text, { extra:err });
-      });
-    return changes;
+      .on('complete', function (err) {
+        var text = 'a changes feed terminated'
+        captureMessage(text, { extra: err })
+      })
+    return changes
   }
-  function inline(obj) {
-    var path = obj.configurationDocument.inlinePath;
+  function inline (obj) {
+    var path = obj.configurationDocument.inlinePath
     if (path) {
-      var id = _.get(obj.change, path);
+      var id = _.get(obj.change, path)
       return db
         .get(id)
-        .then(function(document) {
-          _.set(obj.change, path, document);
-          return obj;
+        .then(function (document) {
+          _.set(obj.change, path, document)
+          return obj
         })
-        .catch(function(error) {
-          captureMessage('error inlining document '+id, { extra:error });
+        .catch(function (error) {
+          captureMessage('error inlining document ' + id, { extra: error })
           // returning the object without inlining seems the most
           // reasonable thing we can do here. anyway this will likely
           // lead to an error with templating
-          return obj;
-        });
+          return obj
+        })
     } else {
-      return Q(obj);
+      return Q(obj)
     }
   }
 
@@ -78,29 +78,29 @@ function withOptions(options) {
    * example where to check that the Telerivet endpoint is reachable,
    * options are defined, etcetera. this would allow to spot errors
    * early during initialisation, instead of during operations */
-  
+
   return {
     configurationDocument: {
-      getInitial: function() {
-        return db.get(configurationId);
+      getInitial: function () {
+        return db.get(configurationId)
       },
-      getChanges: function() {
+      getChanges: function () {
         return listenChanges({
-          doc_ids: [configurationId],
-        });
+          doc_ids: [configurationId]
+        })
       }
     },
     captureMessage: captureMessage,
     captureError: client.captureError.bind(client),
-    getChanges: function() {
+    getChanges: function () {
       return listenChanges({
         filter: '_view',
         view: 'dashboard/symptomatic-followups-by-dateofvisit'
-      });
+      })
     },
     inline: inline,
-    sendToMobile: function(message) {
-      log.debug('sending '+JSON.stringify(message));
+    sendToMobile: function (message) {
+      log.debug('sending ' + JSON.stringify(message))
       request({
         json: true,
         body: {
@@ -109,34 +109,34 @@ function withOptions(options) {
         },
         method: 'POST',
         url: options.gateway
-      }, function(error, response, body) {
+      }, function (error, response, body) {
         if (!error) {
-          log.debug('message sent to '+message.to);
-          log.debug('response is '+JSON.stringify(response));
+          log.debug('message sent to ' + message.to)
+          log.debug('response is ' + JSON.stringify(response))
         } else {
           captureMessage(error, {
             extra: {
               response: JSON.stringify(response),
               body: JSON.stringify(body)
             }
-          });
+          })
         }
-      });
+      })
     }
-  };
+  }
 }
 
-function dispatch(obj) {
-  var render = _.template(obj.configurationDocument.template),
-      content = render(obj.change),
-      outgoing = obj.configurationDocument.recipients.map(function(recipient) {
-        return {
-          to: recipient,
-          content: content
-        };
-      });
-  log.debug('dispatching '+outgoing.length+' messages');
-  return outgoing;
+function dispatch (obj) {
+  var render = _.template(obj.configurationDocument.template)
+  var content = render(obj.change)
+  var outgoing = obj.configurationDocument.recipients.map(function (recipient) {
+    return {
+      to: recipient,
+      content: content
+    }
+  })
+  log.debug('dispatching ' + outgoing.length + ' messages')
+  return outgoing
 }
 
 module.exports = {

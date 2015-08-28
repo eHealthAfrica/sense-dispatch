@@ -21,9 +21,18 @@
     "url": "https://github.com/eHealthAfrica/sense-dispatch/issues"
   },
   "bin": "./sense-dispatch.js",
+  "standard": {
+    "global": [
+      "describe",
+      "it",
+      "beforeEach",
+      "afterEach",
+      "assert"
+    ]
+  },
   "scripts": {
     "prepublish": "grunt build",
-    "test": "grunt test"
+    "test": "standard && grunt test"
   },
   "devDependencies": {
     "chai": "~1.8.1",
@@ -35,7 +44,8 @@
     "mocha-slow-reporter": "0.0.0",
     "mocha-unfunk-reporter": "~0.4.0",
     "rimraf": "~2.2.5",
-    "sinon": "^1.16.0"
+    "sinon": "^1.16.0",
+    "standard": "^5.1.0"
   },
   "peerDependencies": {},
   "dependencies": {
