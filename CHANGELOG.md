@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0 - 7 September 2015
+### Minor
+- add timestamps to log lines
+
 ## 0.2.0 - 26 August 2015
 ### Minor
 - add the `inlinePath` conf option in order to inline docs

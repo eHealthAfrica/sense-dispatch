@@ -7,6 +7,19 @@ var log = require('loglevel')
 var Q = require('q')
 var sentryEndpoint = 'https://73134a7f0b994921808bfac454af4c78:369aeb7cae02496ba255b60ad352097e@app.getsentry.com/50531'
 
+function addTime () {
+  // add timestamps to logged lines
+  var originalFactory = log.methodFactory
+  log.methodFactory = function (methodName, logLevel, loggerName) {
+    var rawMethod = originalFactory(methodName, logLevel, loggerName)
+    return function (message) {
+      var timestamp = (new Date()).toISOString()
+      rawMethod(timestamp + ' - ' + message)
+    }
+  }
+}
+addTime()
+
 function withOptions (options) {
   assert(options.database, 'Pouch requires a database name')
   var db = new PouchDB(options.database)
