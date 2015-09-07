@@ -53,7 +53,7 @@ function withOptions (options) {
     changes
       .on('change', function () {
         log.debug('change detected')
-        log.debug(arguments)
+        log.debug(JSON.stringify(arguments))
       })
       .on('error', function (err) {
         var text = 'change with options ' + ident + ' found an error'
