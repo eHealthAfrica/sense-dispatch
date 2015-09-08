@@ -33,8 +33,8 @@ module.exports.main = function (options, mockedLib) {
     lib.log.error(JSON.stringify(err))
     withOptions.captureMessage(text, { extra: err })
   }
-  withOptions.configurationDocument
-    .getInitial()
+  withOptions
+    .getFirstConfigurationDocument()
     .then(function (firstConfigurationDocument) {
       lib.log.debug('got configuration document ' + JSON.stringify(firstConfigurationDocument))
       // expose for tests
@@ -43,7 +43,7 @@ module.exports.main = function (options, mockedLib) {
         /* changes feeds are wrapped into `Bacon.repeat` in order to
          * be robust to network conditions with a small timeout */
         var stream = Bacon.repeat(function () {
-          var changes = withOptions.configurationDocument.getChanges()
+          var changes = withOptions.followers.configuration()
           return changesToStream(changes, lib)
         })
 
@@ -60,7 +60,7 @@ module.exports.main = function (options, mockedLib) {
       /* changes feeds are wrapped into `Bacon.repeat` in order to be
        * robust to network conditions with a small timeout */
       var changes = Bacon.repeat(function () {
-        return changesToStream(withOptions.getChanges(), lib)
+        return changesToStream(withOptions.followers.view(), lib)
       })
       changes.onError(onError)
       // the configuration document is a property, while the changes

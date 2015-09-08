@@ -1,4 +1,4 @@
-describe('the second library', function () {
+describe('the library', function () {
   var lib = require('../../lib')
   it('exports a main module object', function () {
     lib.should.exist
@@ -64,10 +64,10 @@ describe('the second library', function () {
       }, 'Pouch requires a database name')
     })
     it('returns an event emitter for database changes', function () {
-      withOptions.getChanges().on.should.exist
+      withOptions.followers.view().on.should.exist
     })
     it('returns an event emitter for configuration changes', function () {
-      withOptions.configurationDocument.getChanges().on.should.exist
+      withOptions.followers.configuration().on.should.exist
     })
   })
 })

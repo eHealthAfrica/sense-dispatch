@@ -25,6 +25,62 @@ function withOptions (options) {
   var db = new PouchDB(options.database)
   var configurationId = 'sense-dispatch-configuration'
   var client = new raven.Client(sentryEndpoint)
+  // change feeds timeout, and Pouch will not store the last sequence
+  // number for us. The reactive logic will restart the change feed,
+  // but in that short time interval we might lose some events if we
+  // just used "now" as a parameter for `since`. Thus we need to keep
+  // track of the last sequence number for every change we follow. See
+  // also #12
+  function followerFactory (name, options) {
+    var since = 'now'
+    // sometimes we might not receive any `change` event, thus in
+    // order to get a recent value for `since` in any case, we create
+    // a changes feed which has `live` not set, and we intercept the
+    // `complete` event
+    var oneShotOptions = _.defaults(options, { since: 'now' })
+    db.changes(oneShotOptions).on('complete', function (info) {
+      since = info.last_seq
+      log.debug(name + ' feed stored sequence number ' + since)
+    })
+    return function () {
+      // some options are always used
+      var complete = _.defaults(options, {
+        live: true,
+        include_docs: true,
+        since: since
+      })
+      log.debug(name + ' follower listening for changes with options ' +
+                JSON.stringify(complete) +
+                ' since sequence number ' + since)
+      var changes = db.changes(complete)
+      changes
+        .on('change', function () {
+          log.debug(name + ' feed detected a change')
+          log.debug(JSON.stringify(arguments))
+          since = arguments[0].seq
+          log.debug('stored sequence number ' + since)
+        })
+        .on('error', function (err) {
+          var errorString = String(err)
+          if (errorString === 'Error: ETIMEDOUT') {
+            log.debug(name + ' feed timed out, it will be restarted')
+          } else {
+            var text = name + ' feed found error ' + errorString
+            captureMessage(text, { extra: err })
+          }
+        })
+      return changes
+    }
+  }
+  var followers = {
+    view: followerFactory('View', {
+      filter: '_view',
+      view: 'dashboard/symptomatic-followups-by-dateofvisit'
+    }),
+    configuration: followerFactory('Configuration', {
+      doc_ids: [configurationId]
+    })
+  }
 
   options.debug && log.setLevel('debug')
 
@@ -37,33 +93,6 @@ function withOptions (options) {
     log.error(text)
     log.error(JSON.stringify(options.extra))
     client.captureMessage.apply(client, arguments)
-  }
-  function listenChanges (options) {
-    // the options used identify this change emitter
-    var ident = JSON.stringify(options)
-    log.debug('listening for changes with options ' + ident)
-    // some options are always used, i omitted them from `ident` in
-    // order to make logs easier to follow
-    var complete = _.defaults(options, {
-      live: true,
-      include_docs: true,
-      since: 'now'
-    })
-    var changes = db.changes(complete)
-    changes
-      .on('change', function () {
-        log.debug('change detected')
-        log.debug(JSON.stringify(arguments))
-      })
-      .on('error', function (err) {
-        var text = 'change with options ' + ident + ' found an error'
-        captureMessage(text, { extra: err })
-      })
-      .on('complete', function (err) {
-        var text = 'a changes feed terminated'
-        captureMessage(text, { extra: err })
-      })
-    return changes
   }
   function inline (obj) {
     var path = obj.configurationDocument.inlinePath
@@ -93,24 +122,12 @@ function withOptions (options) {
    * early during initialisation, instead of during operations */
 
   return {
-    configurationDocument: {
-      getInitial: function () {
-        return db.get(configurationId)
-      },
-      getChanges: function () {
-        return listenChanges({
-          doc_ids: [configurationId]
-        })
-      }
+    followers: followers,
+    getFirstConfigurationDocument: function () {
+      return db.get(configurationId)
     },
     captureMessage: captureMessage,
     captureError: client.captureError.bind(client),
-    getChanges: function () {
-      return listenChanges({
-        filter: '_view',
-        view: 'dashboard/symptomatic-followups-by-dateofvisit'
-      })
-    },
     inline: inline,
     sendToMobile: function (message) {
       log.debug('sending ' + JSON.stringify(message))

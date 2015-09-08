@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0 - 8 September 2015
+### Minor
+- keep track of the last sequence number, closes #12
+
+I will tag this as the first major release, because i think that we
+will go to production with this
+
 ## 0.3.0 - 7 September 2015
 ### Minor
 - add timestamps to log lines
