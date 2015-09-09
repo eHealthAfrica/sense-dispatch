@@ -121,6 +121,25 @@ function withOptions (options) {
     }
   }
 
+  function markAsStarted (obj) {
+    if (obj.change.dispatcherNotification) {
+      // this can happen in case the corresponding view is not
+      // excluding documents with `dispatcherNotification` set
+      return Q.reject('change event collected twice! ' + JSON.stringify(obj))
+    } else {
+      obj.change.dispatcherNotification = {
+        status: 'started'
+      }
+      return db
+        .put(obj.change)
+        .then(function () {
+          // returning the original object in order to be processed by
+          // successive stages
+          return obj
+        })
+    }
+  }
+
   /* this is a nice place where to do some consistency check, for
    * example where to check that the Telerivet endpoint is reachable,
    * options are defined, etcetera. this would allow to spot errors
@@ -134,6 +153,7 @@ function withOptions (options) {
     captureMessage: captureMessage,
     captureError: client.captureError.bind(client),
     inline: inline,
+    markAsStarted: markAsStarted,
     sendToMobile: function (message) {
       log.debug('sending ' + JSON.stringify(message))
       request({

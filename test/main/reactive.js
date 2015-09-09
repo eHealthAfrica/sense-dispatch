@@ -40,6 +40,7 @@ describe('the reactive logic', function () {
           view: constant(emitters.changes)
         },
         inline: function (a) { return Q(a) },
+        markAsStarted: function (a) { return Q(a) },
         sendToMobile: sinon.spy(),
         captureError: sinon.spy()
       }

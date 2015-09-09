@@ -1,3 +1,4 @@
+var PouchDB = require('pouchdb')
 describe('the library', function () {
   var lib = require('../../lib')
   it('exports a main module object', function () {
@@ -68,6 +69,82 @@ describe('the library', function () {
     })
     it('returns an event emitter for configuration changes', function () {
       withOptions.followers.configuration().on.should.exist
+    })
+    describe('with a doc in the database', function () {
+      // this extra step helped me to debug the way the test framework
+      // works in relation with Pouch
+      var db = new PouchDB('test')
+      var id = 'id'
+      var doc
+      function setFixture () {
+        doc = { _id: id }
+        return db
+          .get(id) // possibly written in previous runs
+          .then(function (ret) {
+            return db.remove(ret)
+          })
+          .finally(function () {
+            return db.post(doc)
+          })
+      }
+      beforeEach(function (done) {
+        return setFixture()
+          .then(function () { done() })
+          .catch(done)
+      })
+      it('can get the doc', function (done) {
+        db.get(id).then(function () { done() })
+      })
+      it('can update the doc', function (done) {
+        db
+          .get(id)
+          .then(function (doc) {
+            return db.put(doc)
+          })
+          .then(function () { done() })
+      })
+      describe('markAsStarted', function () {
+        var returned
+        var obj
+        beforeEach(function (done) {
+          setFixture()
+            .then(function () {
+              return db.get(id)
+            })
+            .then(function (doc) {
+              obj = {
+                change: doc
+              }
+              return withOptions.markAsStarted(obj)
+            })
+            .then(function (_returned_) {
+              returned = _returned_
+            })
+            .then(function () { done() })
+        })
+        it('returns the object as expected', function () {
+          assert.deepEqual(returned, obj)
+        })
+        it('modifies the document as expected', function (done) {
+          var expected = {
+            _id: id,
+            dispatcherNotification: {
+              status: 'started'
+            }
+          }
+          db
+            .get(id)
+            .then(function (returned) {
+              try {
+                delete returned._rev // this would be different
+                assert.deepEqual(returned, expected)
+                done()
+              } catch (err) {
+                done(err)
+              }
+            })
+        })
+      })
     })
   })
 })
