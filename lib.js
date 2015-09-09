@@ -36,7 +36,12 @@ function withOptions (options) {
     // sometimes we might not receive any `change` event, thus in
     // order to get a recent value for `since` in any case, we create
     // a changes feed which has `live` not set, and we intercept the
-    // `complete` event
+    // `complete` event. Note that this is asynchronous and the
+    // following code is not waiting for this to happen, thus the
+    // first `since` will always have value `"now"`. Anyway `complete`
+    // will be triggered almost immediately, so we will have an
+    // updated value for `since` for all the remining life of the
+    // process
     var oneShotOptions = _.defaults(options, { since: 'now' })
     db.changes(oneShotOptions).on('complete', function (info) {
       since = info.last_seq
