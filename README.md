@@ -42,3 +42,9 @@ example like this:
     sense-dispatch.js -b -g https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense/_messages -d https://user:pass@dev-sl-ebola-cases.eocng.org/_couchdb/sense
 
 Note that `-b` activates extra debugging info and can be omitted.
+
+#### Tests
+
+While this project has a good coverage of unit tests, which are
+obviously run via `npm test`, you can also find some notes about
+manual tests [here](how-to-test.md)

@@ -8,6 +8,15 @@ describe('the reactive logic', function () {
   it('exports a main module object', function () {
     main.should.be.a('function')
   })
+  describe('without a mocked library', function () {
+    beforeEach(function () {
+    })
+    it('does not throw any exception', function () {
+      assert.doesNotThrow(function () {
+        main({ database: 'test' })
+      })
+    })
+  })
   describe('with a mocked library', function () {
     var sinon = require('sinon')
     var events = require('events')
@@ -25,17 +34,17 @@ describe('the reactive logic', function () {
         changes: new events.EventEmitter()
       }
       withOptions = {
-        configurationDocument: {
-          getInitial: constant(deferred.promise),
-          getChanges: constant(emitters.configurationDocument)
+        getFirstConfigurationDocument: constant(deferred.promise),
+        followers: {
+          configuration: constant(emitters.configurationDocument),
+          view: constant(emitters.changes)
         },
-        getChanges: constant(emitters.changes),
         inline: function (a) { return Q(a) },
         sendToMobile: sinon.spy(),
         captureError: sinon.spy()
       }
       // we need to do this before passing `withOptions` to `constant`
-      sinon.spy(withOptions, 'getChanges')
+      sinon.spy(withOptions.followers, 'view')
       lib = {
         withOptions: constant(withOptions),
         dispatch: sinon.spy(function () { return [1, 2, 3] }),
@@ -55,9 +64,9 @@ describe('the reactive logic', function () {
       })
     })
     it('is correctly spied', function () {
-      assert(!withOptions.getChanges.called)
-      lib.withOptions().getChanges()
-      assert(withOptions.getChanges.called)
+      assert(!withOptions.followers.view.called)
+      lib.withOptions().followers.view()
+      assert(withOptions.followers.view.called)
     })
     describe('with a document configuration', function () {
       beforeEach(function (done) {
@@ -74,7 +83,7 @@ describe('the reactive logic', function () {
         assert.deepEqual(spy.args[0], [{conf: 'doc'}])
       })
       it('asks for changes', function () {
-        assert(withOptions.getChanges.called)
+        assert(withOptions.followers.view.called)
       })
       it('allows the configuration to be sampled', function () {
         var stream = Bacon.fromArray([1, 2, 3])
