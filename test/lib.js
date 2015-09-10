@@ -1,7 +1,7 @@
 var PouchDB = require('pouchdb')
 var databaseName = 'test-database'
 describe('the library', function () {
-  var lib = require('../../lib')
+  var lib = require('../lib')
   it('exports a main module object', function () {
     lib.should.exist
   })
@@ -83,14 +83,19 @@ describe('the library', function () {
           .get(id) // possibly written in previous runs
           .then(function (ret) {
             return db.remove(ret)
+          }, function () { // not found, no need to remove it
+            return
           })
-          .finally(function () {
+          .then(function () {
             return db.post(doc)
           })
       }
       beforeEach(function (done) {
         db = new PouchDB(databaseName)
-        return setFixture()
+        db
+          .then(function () {
+            return setFixture()
+          })
           .then(function () { done() })
           .catch(done)
       })

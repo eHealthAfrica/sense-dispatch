@@ -3,7 +3,7 @@ describe('the reactive logic', function () {
   var Bacon = require('baconjs')
   var reactive, main
   beforeEach(function () {
-    reactive = require('../../reactive')
+    reactive = require('../reactive')
     main = reactive.main
   })
   it('exports a main module object', function () {
