@@ -74,9 +74,16 @@ module.exports.main = function (options, mockedLib) {
             change: change
           }
         })
+      // mark the document as started. if the document goes through it
+      // has been marked and it will not be collected by the filtering
+      // view anymore
+      var marked = changesAndConfigurations.flatMap(function (obj) {
+        var promise = withOptions.markAsStarted(obj)
+        return Bacon.fromPromise(promise)
+      })
       // we convert the returned promises to streams which will be
       // concatenated by `flatMap`
-      var inlined = changesAndConfigurations.flatMap(function (obj) {
+      var inlined = marked.flatMap(function (obj) {
         var promise = withOptions.inline(obj)
         return Bacon.fromPromise(promise)
       })

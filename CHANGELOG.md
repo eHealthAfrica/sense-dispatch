@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 - 9 September 2015
+### Minor
+- add a check in order to prevent double notifications even in case of
+  multiple services running concurrently and in case of change events
+  triggered twice, closes #18
+
 ## 1.0.0 - 8 September 2015
 ### Minor
 - keep track of the last sequence number, closes #12

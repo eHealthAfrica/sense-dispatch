@@ -1,8 +1,9 @@
+var databaseName = 'test-database'
 describe('the reactive logic', function () {
   var Bacon = require('baconjs')
   var reactive, main
   beforeEach(function () {
-    reactive = require('../../reactive')
+    reactive = require('../reactive')
     main = reactive.main
   })
   it('exports a main module object', function () {
@@ -13,7 +14,7 @@ describe('the reactive logic', function () {
     })
     it('does not throw any exception', function () {
       assert.doesNotThrow(function () {
-        main({ database: 'test' })
+        main({ database: databaseName })
       })
     })
   })
@@ -40,6 +41,7 @@ describe('the reactive logic', function () {
           view: constant(emitters.changes)
         },
         inline: function (a) { return Q(a) },
+        markAsStarted: function (a) { return Q(a) },
         sendToMobile: sinon.spy(),
         captureError: sinon.spy()
       }
