@@ -1,11 +1,12 @@
 var PouchDB = require('pouchdb')
+var databaseName = 'test-database'
 describe('the library', function () {
   var lib = require('../../lib')
   it('exports a main module object', function () {
     lib.should.exist
   })
   it('builds a withOptions object', function () {
-    lib.withOptions({ database: 'test' }).should.exist
+    lib.withOptions({ database: databaseName }).should.exist
   })
   describe('dispatch', function () {
     it('dispatches', function () {
@@ -56,7 +57,7 @@ describe('the library', function () {
     var withOptions
     beforeEach(function () {
       withOptions = lib.withOptions({
-        database: 'test'
+        database: databaseName
       })
     })
     it('throws an error when the database is missing', function () {
@@ -73,8 +74,8 @@ describe('the library', function () {
     describe('with a doc in the database', function () {
       // this extra step helped me to debug the way the test framework
       // works in relation with Pouch
-      var db = new PouchDB('test')
       var id = 'id'
+      var db
       var doc
       function setFixture () {
         doc = { _id: id }
@@ -88,6 +89,7 @@ describe('the library', function () {
           })
       }
       beforeEach(function (done) {
+        db = new PouchDB(databaseName)
         return setFixture()
           .then(function () { done() })
           .catch(done)

@@ -1,3 +1,4 @@
+var databaseName = 'test-database'
 describe('the reactive logic', function () {
   var Bacon = require('baconjs')
   var reactive, main
@@ -13,7 +14,7 @@ describe('the reactive logic', function () {
     })
     it('does not throw any exception', function () {
       assert.doesNotThrow(function () {
-        main({ database: 'test' })
+        main({ database: databaseName })
       })
     })
   })
