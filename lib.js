@@ -80,7 +80,7 @@ function withOptions (options) {
   var followers = {
     view: followerFactory('View', {
       filter: '_view',
-      view: 'dashboard/symptomatic-followups-by-dateofvisit'
+      view: 'dashboard/symptomatic-followups-not-notified-by-dateofvisit'
     }),
     configuration: followerFactory('Configuration', {
       doc_ids: [configurationId]
