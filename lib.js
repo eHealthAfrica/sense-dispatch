@@ -67,11 +67,15 @@ function withOptions (options) {
         })
         .on('error', function (err) {
           var errorString = String(err)
-          if (errorString === 'Error: ETIMEDOUT') {
-            log.debug(name + ' feed timed out, it will be restarted')
-          } else {
+          var timeouts = [
+            'Error: ETIMEDOUT',
+            'Error: ESOCKETTIMEDOUT'
+          ]
+          if (timeouts.indexOf(errorString) === -1) {
             var text = name + ' feed found error ' + errorString
             captureMessage(text, { extra: err })
+          } else {
+            log.debug(name + ' feed timed out, it will be restarted')
           }
         })
       return changes
