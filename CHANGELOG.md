@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0 - 11 September 2015
+### Minor
+- avoid reporting "Error: ESOCKETTIMEDOUT" to Sentry
+
 ## 1.2.0 - 10 September 2015
 ### Minor
 - use a view which excludes notified documents from the changes feed
