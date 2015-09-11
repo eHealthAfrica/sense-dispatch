@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 - 10 September 2015
+### Minor
+- use a view which excludes notified documents from the changes feed
+
 ## 1.1.0 - 9 September 2015
 ### Minor
 - add a check in order to prevent double notifications even in case of
