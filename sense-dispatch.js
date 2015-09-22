@@ -20,6 +20,11 @@ var options = yargs
     'b': {
       alias: 'debug',
       describe: 'Add extra log message for debugging'
+    },
+    's': {
+      alias: 'sentry',
+      describe: 'Enable Sentry reporting',
+      default: true
     }
   })
   .argv

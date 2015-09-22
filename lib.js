@@ -10,6 +10,12 @@ var router = require('./router')
 
 var sentryEndpoint = 'https://73134a7f0b994921808bfac454af4c78:369aeb7cae02496ba255b60ad352097e@app.getsentry.com/50531'
 
+var dummyRaven = {
+  patchGlobal: function () {},
+  captureMessage: function () {},
+  captureError: function () {}
+}
+
 function addTime () {
   // add timestamps to logged lines
   var originalFactory = log.methodFactory
@@ -27,7 +33,7 @@ function withOptions (options) {
   assert(options.database, 'Pouch requires a database name')
   var db = new PouchDB(options.database)
   var configurationId = 'sense-dispatch-configuration'
-  var client = new raven.Client(sentryEndpoint)
+  var client = options.sentry ? new raven.Client(sentryEndpoint) : dummyRaven
   // change feeds timeout, and Pouch will not store the last sequence
   // number for us. The reactive logic will restart the change feed,
   // but in that short time interval we might lose some events if we
