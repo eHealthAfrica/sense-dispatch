@@ -13,7 +13,9 @@ describe('the library', function () {
       var result = lib.dispatch({
         configurationDocument: {
           template: 'A new Ebola suspect was found, the id is ${ personId }',
-          recipients: ['1234']
+          routing: {
+            defaults: ['1234']
+          }
         },
         change: {
           personId: 'a-b-c-d'
@@ -29,7 +31,7 @@ describe('the library', function () {
         lib.dispatch({
           configurationDocument: {
             template: 'A new Ebola suspect was found, the id is ${ persoId }',
-            recipients: ['1234']
+            routing: { defaults: ['1234'] }
           },
           change: {
             personId: 'a-b-c-d'
@@ -41,7 +43,7 @@ describe('the library', function () {
       var result = lib.dispatch({
         configurationDocument: {
           template: 'A new Ebola suspect was found, the id is ${ one.two }',
-          recipients: ['1234']
+          routing: { defaults: ['1234'] }
         },
         change: {
           one: {}

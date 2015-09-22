@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.0 - upcoming
+### Major
+- `recipients` is not supported anymore, use `routing.defaults`
+  instead. the recommended way to do the transition is write a
+  `routing` property in your configuration documents before updating
+  this component. After the update, `recipients` will be ignored
+### Minor
+- add cascading routing, see #23
+
 ## 1.3.0 - 11 September 2015
 ### Minor
 - avoid reporting "Error: ESOCKETTIMEDOUT" to Sentry

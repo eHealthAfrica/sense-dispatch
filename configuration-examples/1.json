@@ -1,5 +1,20 @@
 {
-  "recipients": ["+1234", "+56789"],
   "template": "A new Ebola suspect was found, the name is ${personId.otherNames} ${ personId.surname }",
-  "inlinePath": "personId"
+  "inlinePath": "personId",
+  "routing": {
+    "map": [{
+      "discriminator": "personId.address.ward",
+      "cases": {
+        345: ["345-111", "345-222"],
+        323: ["323-111"]
+      }
+    }, {
+      "discriminator": "personId.address.adminDivision2",
+      "cases": {
+        31: ["31-111", "31-222"],
+        32: ["32-111"]
+      }
+    }]
+    "default": ["+1234", "+56789"]
+  }
 }
