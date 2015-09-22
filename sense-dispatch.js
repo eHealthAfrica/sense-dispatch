@@ -4,7 +4,7 @@ var yargs = require('yargs')
 var reactive = require('./reactive')
 
 var options = yargs
-  .version('1.3.0')
+  .version('2.0.0')
   .usage('Usage: $0 -d <database location> -g <gateway location>')
   .options({
     'd': {
@@ -20,6 +20,11 @@ var options = yargs
     'b': {
       alias: 'debug',
       describe: 'Add extra log message for debugging'
+    },
+    's': {
+      alias: 'sentry',
+      describe: 'Enable Sentry reporting',
+      default: true
     }
   })
   .argv

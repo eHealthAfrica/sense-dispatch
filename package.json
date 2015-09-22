@@ -1,6 +1,6 @@
 {
   "name": "sense-dispatch",
-  "version": "1.3.0",
+  "version": "2.0.0",
   "description": "messaging framework for eHealth Sense app.",
   "keywords": [
     "sense",
@@ -31,7 +31,7 @@
     ]
   },
   "scripts": {
-    "test": "standard && mocha"
+    "test": "mocha && standard"
   },
   "devDependencies": {
     "chai": "^3.2.0",
@@ -51,5 +51,15 @@
     "raven": "^0.8.1",
     "request": "^2.61.0",
     "yargs": "^3.20.0"
+  },
+  "standard": {
+    "globals": [
+      "expect",
+      "describe",
+      "beforeEach",
+      "afterEach",
+      "it",
+      "assert"
+    ]
   }
 }
